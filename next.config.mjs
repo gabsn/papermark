@@ -30,6 +30,8 @@ const SELFHOST_ALIASES = {
 
 /** @type {import('next').NextConfig} */
 const nextConfig = {
+  // selfhost: type-check against selfhost/ee instead of the commercial ee/ (tsconfig.selfhost.json).
+  ...(process.env.PAPERMARK_SELFHOST === "1" ? { typescript: { tsconfigPath: "tsconfig.selfhost.json" } } : {}),
   reactStrictMode: true,
   pageExtensions: ["js", "jsx", "ts", "tsx", "mdx"],
   transpilePackages: ["@boxyhq/saml-jackson", "@libpdf/core"],

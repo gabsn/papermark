@@ -65,6 +65,15 @@ export default async function handle(
         const defaultTeam = await prisma.team.create({
           data: {
             name: defaultTeamName,
+            // selfhost: billing is disabled, so the first team starts on the top plan and
+            // every plan-gated feature (NDA, watermark, data rooms, branding) is enabled.
+            // Teams created later (POST below) get it from canCreateUnlimitedTeam.
+            ...(process.env.PAPERMARK_SELFHOST === "1"
+              ? {
+                  plan: "datarooms-unlimited",
+                  limits: structuredClone(DATAROOMS_UNLIMITED_PLAN_LIMITS),
+                }
+              : {}),
             users: {
               create: {
                 userId: user.id,

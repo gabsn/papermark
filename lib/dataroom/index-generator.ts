@@ -46,8 +46,17 @@ const formatBytes = (bytes: number): number => {
   return parseFloat(mb.toFixed(2));
 };
 
+// selfhost: the API routes import this name; upstream never exported it.
+export type DataroomIndexSource = {
+  id: string;
+  dataroom: Omit<LinkWithDataroom["dataroom"], "teamId"> & {
+    createdAt?: Date;
+    lastUpdatedAt?: Date;
+  };
+};
+
 export async function generateDataroomIndex(
-  link: LinkWithDataroom,
+  link: DataroomIndexSource,
   options: GenerateIndexOptions = {},
 ): Promise<{ data: Buffer; filename: string; mimeType: string }> {
   const { format = "excel", baseUrl, showHierarchicalIndex = false } = options;

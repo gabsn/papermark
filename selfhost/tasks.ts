@@ -2,13 +2,14 @@
 // "./ee/**/lib/trigger"). The worker imports each one so its tasks register; a module
 // that throws on load (e.g. a missing env var) only disables its own tasks.
 // Keep in sync when a task file is added.
+// AI indexing and conversation notifications are switched off in the self-hosted edition:
+// their modules under selfhost/ee/features/{ai,conversations} define no tasks, so they
+// (and lib/trigger/conversation-message-notification, which re-exports them) are not listed.
 export const TASK_MODULES: Record<string, () => Promise<unknown>> = {
   "lib/trigger/automatic-unpause": () => import("@/lib/trigger/automatic-unpause"),
   "lib/trigger/backfill-video-lengths": () => import("@/lib/trigger/backfill-video-lengths"),
   "lib/trigger/bulk-download": () => import("@/lib/trigger/bulk-download"),
   "lib/trigger/cleanup-expired-exports": () => import("@/lib/trigger/cleanup-expired-exports"),
-  "lib/trigger/conversation-message-notification": () =>
-    import("@/lib/trigger/conversation-message-notification"),
   "lib/trigger/convert-pdf-direct": () => import("@/lib/trigger/convert-pdf-direct"),
   "lib/trigger/dataroom-change-notification": () =>
     import("@/lib/trigger/dataroom-change-notification"),
@@ -22,13 +23,14 @@ export const TASK_MODULES: Record<string, () => Promise<unknown>> = {
   "lib/trigger/queues": () => import("@/lib/trigger/queues"),
   "lib/trigger/send-upgrade-checkin-email": () => import("@/lib/trigger/send-upgrade-checkin-email"),
   "lib/trigger/setup-signing-template": () => import("@/lib/trigger/setup-signing-template"),
-  "ee/features/ai/lib/trigger": () => import("@/ee/features/ai/lib/trigger"),
   "ee/features/billing/cancellation/lib/trigger/pause-resume-notification": () =>
     import("@/ee/features/billing/cancellation/lib/trigger/pause-resume-notification"),
   "ee/features/billing/cancellation/lib/trigger/unpause-task": () =>
     import("@/ee/features/billing/cancellation/lib/trigger/unpause-task"),
-  "ee/features/conversations/lib/trigger/conversation-message-notification": () =>
-    import("@/ee/features/conversations/lib/trigger/conversation-message-notification"),
+  "ee/features/billing/dataroom-trial/lib/trigger/send-scheduled-email": () =>
+    import("@/ee/features/billing/dataroom-trial/lib/trigger/send-scheduled-email"),
+  "ee/features/conversions/lib/trigger/convert-files": () =>
+    import("@/ee/features/conversions/lib/trigger/convert-files"),
   "ee/features/dataroom-freeze/lib/trigger/dataroom-freeze-archive": () =>
     import("@/ee/features/dataroom-freeze/lib/trigger/dataroom-freeze-archive"),
   // The QStash replacement's HTTP delivery task.

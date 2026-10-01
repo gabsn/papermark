@@ -1,0 +1,95 @@
+ee/features/access-notifications <- 2 files: reportDeniedAccessAttempt
+ee/features/ai/components/agents-settings-card <- 1 files: AgentsSettingsCard
+ee/features/ai/components/document-ai-dialog <- 1 files: DocumentAIDialog
+ee/features/ai/components/viewer-chat-panel <- 2 files: ViewerChatPanel
+ee/features/ai/components/viewer-chat-provider <- 4 files: ViewerChatLayout, ViewerChatProvider, useViewerChatSafe
+ee/features/ai/components/viewer-chat-toggle <- 2 files: ViewerChatToggle
+ee/features/ai/lib/trigger <- 2 files: SUPPORTED_AI_CONTENT_TYPES, addFileToVectorStoreTask, processDocumentForAITask
+ee/features/billing/cancellation/api/automatic-unpause-route <- 1 files: handleRoute
+ee/features/billing/cancellation/components <- 1 files: CancellationModal
+ee/features/billing/cancellation/lib/is-team-paused <- 21 files: isTeamPaused, isTeamPausedById
+ee/features/billing/cancellation/lib/trigger/pause-resume-notification <- 1 files: sendPauseResumeNotificationTask
+ee/features/billing/cancellation/lib/trigger/unpause-task <- 1 files: automaticUnpauseTask
+[MISSING] ee/features/billing/dataroom-trial/lib/trigger/send-scheduled-email <- 1 files: sendDataroomTrial24hReminderEmailTask, sendDataroomTrialExpiredEmailTask, sendDataroomTrialInfoEmailTask
+[MISSING] ee/features/branding/components/banner-editor <- 2 files: BannerEditor
+[MISSING] ee/features/branding/components/branding-link-preview-form <- 2 files: BrandingLinkPreviewForm
+[MISSING] ee/features/branding/components/branding-preview-chrome <- 2 files: BrandingPreviewChrome
+[MISSING] ee/features/branding/components/branding-social-preview-readonly <- 1 files: BrandingSocialPreviewReadonly
+[MISSING] ee/features/branding/components/collapsible-branding-section <- 2 files: CollapsibleBrandingSection
+[MISSING] ee/features/branding/components/dataroom-layout-preset-cards <- 2 files: DataroomLayoutPresetCards
+[MISSING] ee/features/branding/components/team-brand-switcher <- 1 files: DRAFT_TEAM_BRAND_ID, TeamBrandSwitcher, nextTeamBrandName
+[MISSING] ee/features/branding/components/visitor-language-card <- 1 files: VisitorLanguageCard
+[MISSING] ee/features/branding/lib/auto-fill-result <- 2 files: AUTO_FILL_NOT_FOUND_MESSAGE, autoFillHasBrandAssets
+[MISSING] ee/features/branding/lib/brand-logo <- 8 files: BrandLogoFields, ResolvedBrandLogo, resolveBrandLogo
+[MISSING] ee/features/branding/lib/dataroom-banner <- 3 files: DataroomBannerKind, classifyDataroomBanner
+[MISSING] ee/features/branding/lib/dataroom-preview-presets <- 1 files: getDataroomPreviewDataset
+[MISSING] ee/features/branding/lib/dataroom-viewer-layout <- 9 files: CARD_LAYOUT_OPTIONS, DataroomCardLayout, DataroomCardLayoutSchema, DataroomLayoutCardId, DataroomViewerHeaderStyle, DataroomViewerHeaderStyleSchema, DataroomViewerLayoutPreset, DataroomViewerLayoutPresetSchema, asDataroomCardLayout, asDataroomViewerHeaderStyle, inferDataroomViewerLayoutPreset
+[MISSING] ee/features/branding/lib/delete-team-brand <- 2 files: deleteTeamBrand
+[MISSING] ee/features/branding/lib/prepare-brand-write <- 2 files: prepareBrandWrite
+[MISSING] ee/features/branding/lib/resolve-base-brand <- 11 files: findDefaultBrand, persistDefaultBrand, resolveBaseBrand, resolveDefaultBrandId, resolveOwnedBrandId, teamBrandOgSelect, teamBrandViewerSelect, teamBrandWorkflowSelect
+[MISSING] ee/features/branding/lib/resolve-dataroom-displayed-brand <- 3 files: CUSTOM_DATAROOM_BRAND, CUSTOM_DATAROOM_BRAND_LABEL, inheritsTeamBrand, resolveDisplayedDataroomBrand
+[MISSING] ee/features/branding/lib/resolve-public-link-meta <- 1 files: ResolvedPublicLinkMeta, resolvePublicLinkMeta
+[MISSING] ee/features/branding/lib/upsert-dataroom-brand <- 1 files: upsertDataroomBrandAndClearInherited
+[MISSING] ee/features/branding/lib/use-branding-preview-params <- 3 files: useBrandingPreviewParams
+[MISSING] ee/features/branding/lib/use-logo-tone <- 2 files: useLogoTone
+ee/features/conversations/api/conversations-route <- 1 files: handleRoute
+ee/features/conversations/api/send-conversation-new-message-notification <- 1 files: default:defaultHandler
+ee/features/conversations/api/team-conversations-route <- 1 files: handleRoute
+ee/features/conversations/api/team-faqs-route <- 2 files: default:publishFAQRoute
+[MISSING] ee/features/conversations/api/team-questions-route <- 1 files: handleRoute
+ee/features/conversations/api/toggle-conversations-route <- 1 files: default:toggleConversationsRoute
+ee/features/conversations/components/dashboard/link-option-conversation-section <- 1 files: default:ConversationSection
+[MISSING] ee/features/conversations/components/viewer/conversation-sidebar-provider <- 4 files: ConversationSidebarLayout, ConversationSidebarProvider, useConversationSidebarSafe
+ee/features/conversations/components/viewer/conversation-view-sidebar <- 1 files: ConversationSidebarProps, ConversationViewSidebar
+ee/features/conversations/lib/trigger/conversation-message-notification <- 1 files: sendConversationMentionNotificationTask, sendConversationMessageNotificationTask, sendConversationTeamMemberNotificationTask
+ee/features/conversations/pages/conversation-overview <- 2 files: default:ConversationOverview
+[MISSING] ee/features/conversions/lib/trigger/convert-files <- 3 files: convertFilesToPdfTask, convertKeynoteToPdfTask
+ee/features/dataroom-freeze/components/freeze-settings <- 1 files: default:FreezeSettings
+ee/features/dataroom-freeze/lib/swr/use-freeze-progress <- 1 files: useFreezeProgress
+ee/features/dataroom-invitations/api/group-invite <- 1 files: default:handleRoute
+ee/features/dataroom-invitations/api/link-invite <- 1 files: default:handleRoute
+ee/features/dataroom-invitations/api/uninvited <- 1 files: default:handleRoute
+ee/features/dataroom-invitations/components/invite-viewers-modal <- 3 files: InviteViewersModal
+ee/features/dataroom-invitations/lib/schema/dataroom-invitations <- 1 files: invitationEmailSchema
+ee/features/dataroom-invitations/lib/swr/use-dataroom-invitations <- 1 files: useUninvitedMembers
+[MISSING] ee/features/partners/lib/referrals <- 2 files: isReferralsEnabled
+[MISSING] ee/features/permissions/components/confidential-view/confidential-view-overlay <- 7 files: ConfidentialViewOverlay
+[MISSING] ee/features/permissions/components/confidential-view/confidential-view-section <- 4 files: default:ConfidentialViewSection
+ee/features/permissions/components/dataroom-link-sheet <- 1 files: DataroomLinkSheet, ItemPermission
+ee/features/permissions/components/permissions-sheet <- 1 files: PermissionsSheet
+[MISSING] ee/features/redaction/components/redaction-config-dialog <- 1 files: *dynamic*
+[MISSING] ee/features/redaction/components/redaction-jobs-dialog <- 1 files: *dynamic*
+[MISSING] ee/features/redaction/components/redaction-launcher <- 1 files: RedactionLauncher
+[MISSING] ee/features/redaction/components/redaction-workspace <- 1 files: RedactionWorkspace
+[MISSING] ee/features/request-lists/components/request-list-settings-card <- 1 files: RequestListSettingsCard
+[MISSING] ee/features/request-lists/components/request-list-view <- 1 files: RequestListView
+[MISSING] ee/features/request-lists/components/viewer/request-list-button <- 1 files: RequestListButton
+[MISSING] ee/features/request-lists/components/viewer/request-list-sheet <- 1 files: RequestListSheet
+[MISSING] ee/features/request-lists/lib/assignments <- 1 files: isViewerAssigned
+[MISSING] ee/features/request-lists/lib/events <- 1 files: VIEWER_TOGGLE_REQUEST_LIST_EVENT
+[MISSING] ee/features/request-lists/lib/swr/use-viewer-request-list <- 3 files: useViewerRequestList
+[MISSING] ee/features/request-lists/lib/use-request-list-feature <- 3 files: useRequestListFeatureEnabled
+ee/features/security <- 3 files: checkRateLimit, rateLimiters
+ee/features/security/sso <- 2 files: DirectorySyncConfigModal, SAMLConfigModal, SSOEnforcementToggle, SSOLogin
+ee/features/storage/config <- 5 files: StorageConfig, getStorageConfig, getTeamStorageConfigById
+ee/features/storage/s3-store <- 2 files: MultiRegionS3Store
+ee/features/templates/components/dataroom-templates <- 1 files: default:DataroomTemplates
+ee/features/templates/constants/dataroom-templates <- 1 files: FolderTemplate
+ee/features/templates/lib/prompts <- 1 files: getDataroomSystemPrompt, getDataroomUserPrompt
+ee/features/workflows/components/workflow-access-view <- 2 files: default:WorkflowAccessView
+ee/features/workflows/pages/workflow-detail <- 1 files: default:WorkflowDetail
+ee/features/workflows/pages/workflow-new <- 1 files: default:WorkflowNew
+ee/features/workflows/pages/workflow-overview <- 1 files: default:WorkflowOverview
+[MISSING] ee/limits/can-create-premium-team <- 1 files: PREMIUM_TEAM_LIMIT, getPremiumTeamEligibility
+[MISSING] ee/limits/can-create-unlimited-team <- 1 files: canCreateUnlimitedTeam
+ee/limits/constants <- 1 files: DATAROOMS_PREMIUM_PLAN_LIMITS, DATAROOMS_UNLIMITED_PLAN_LIMITS
+ee/limits/handler <- 1 files: default:limitsHandler
+ee/limits/server <- 10 files: getLimits
+ee/limits/swr-handler <- 3 files: useLimits
+ee/stripe <- 1 files: cancelSubscription
+ee/stripe/constants <- 66 files: Feature, PLAN_NAME_MAP, PlanEnum, getPlanFeatures
+[MISSING] ee/stripe/currency <- 3 files: CURRENCY_LABEL, CURRENCY_SYMBOL, Currency
+ee/stripe/functions/get-price-id-from-plan <- 6 files: getPriceIdFromPlan
+ee/stripe/functions/get-quantity-from-plan <- 1 files: getQuantityFromPriceId
+ee/stripe/functions/get-subscription-item <- 1 files: SubscriptionDiscount
+ee/stripe/utils <- 7 files: PLANS, isOldAccount

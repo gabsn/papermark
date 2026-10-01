@@ -998,7 +998,8 @@ export async function POST(request: NextRequest) {
           notionData: undefined,
           verificationToken: hashedVerificationToken,
           viewerId: viewer?.id,
-          conversationsEnabled: link.enableConversation,
+          // selfhost: conversations are switched off in the self-hosted edition.
+          conversationsEnabled: false,
           enableVisitorUpload: link.enableUpload,
           uploadFolderAllowList,
           agentsEnabled: link.dataroom?.agentsEnabled ?? false,
@@ -1471,7 +1472,8 @@ export async function POST(request: NextRequest) {
             : undefined,
         canDownload: canDownload,
         viewerId: viewer?.id,
-        conversationsEnabled: link.enableConversation,
+        // selfhost: conversations are switched off in the self-hosted edition.
+        conversationsEnabled: false,
         agentsEnabled: link.dataroom?.agentsEnabled ?? false,
         dataroomName: link.dataroom?.name,
         ...(isTeamMember && { isTeamMember: true }),

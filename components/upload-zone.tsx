@@ -296,9 +296,11 @@ export default function UploadZone({
   // than reaching across scopes.
   const filesInputRef = useRef<HTMLInputElement | null>(null);
   const folderInputRef = useRef<HTMLInputElement | null>(null);
-  const hasDocumentLimit = limits?.documents != null && limits.documents > 0;
+  // selfhost: read through a const so the null check narrows it (null = unlimited).
+  const documentLimit = limits?.documents;
+  const hasDocumentLimit = documentLimit != null && documentLimit > 0;
   const remainingDocuments = hasDocumentLimit
-    ? limits.documents - (limits?.usage?.documents ?? 0)
+    ? documentLimit - (limits?.usage?.documents ?? 0)
     : Infinity;
 
   // Fetch team settings with proper revalidation - ensures settings stay fresh across tabs
