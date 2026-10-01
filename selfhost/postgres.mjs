@@ -2,9 +2,9 @@
 // (embedded-postgres), data in $PAPERMARK_DATA/postgres, no service to install.
 import EmbeddedPostgres from "embedded-postgres";
 import { existsSync, mkdirSync } from "node:fs";
-import { join } from "node:path";
+import { join, resolve } from "node:path";
 
-export const DATA_DIR = process.env.PAPERMARK_DATA ?? join(process.cwd(), ".data");
+export const DATA_DIR = resolve(process.env.PAPERMARK_DATA ?? join(process.cwd(), ".data"));
 export const PG_PORT = Number(process.env.PAPERMARK_PG_PORT ?? 54329);
 export const DATABASE_URL = `postgresql://papermark:papermark@127.0.0.1:${PG_PORT}/papermark`;
 
