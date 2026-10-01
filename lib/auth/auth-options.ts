@@ -17,6 +17,11 @@ import prisma from "@/lib/prisma";
 import { CustomUser } from "@/lib/types";
 
 const VERCEL_DEPLOYMENT = !!process.env.VERCEL_URL;
+// selfhost: served over HTTPS (deck.focustree.app), next-auth's getToken looks for the
+// __Secure- cookie, so the session cookie must use that name and the Secure flag too.
+const SECURE_COOKIES =
+  VERCEL_DEPLOYMENT ||
+  (process.env.PAPERMARK_SELFHOST === "1" && !!process.env.NEXTAUTH_URL?.startsWith("https://"));
 
 // selfhost: Google, LinkedIn and passkeys only when configured.
 const enabledAuthProviders = getEnabledAuthProviders();
@@ -199,13 +204,13 @@ export const authOptions: NextAuthOptions = {
   session: { strategy: "jwt" },
   cookies: {
     sessionToken: {
-      name: `${VERCEL_DEPLOYMENT ? "__Secure-" : ""}next-auth.session-token`,
+      name: `${SECURE_COOKIES ? "__Secure-" : ""}next-auth.session-token`,
       options: {
         httpOnly: true,
         sameSite: "lax",
         path: "/",
         domain: VERCEL_DEPLOYMENT ? ".papermark.com" : undefined,
-        secure: VERCEL_DEPLOYMENT,
+        secure: SECURE_COOKIES,
       },
     },
   },
