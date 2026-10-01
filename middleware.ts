@@ -20,17 +20,9 @@ function isAnalyticsPath(path: string) {
 }
 
 function isCustomDomain(host: string) {
-  // selfhost: the app's own host (NEXT_PUBLIC_APP_BASE_HOST, e.g. the Tailscale or
-  // custom domain name) and local addresses are the app, any other host is a custom domain.
-  if (process.env.PAPERMARK_SELFHOST === "1") {
-    const hostname = host?.split(":")[0]?.toLowerCase();
-    const appHost = process.env.NEXT_PUBLIC_APP_BASE_HOST?.toLowerCase();
-    return !(
-      hostname === appHost ||
-      hostname === "localhost" ||
-      hostname === "127.0.0.1"
-    );
-  }
+  // selfhost: no custom domains. The app is reached through its public name
+  // (deck.focustree.app via CloudFront, which forwards the Funnel host) or locally.
+  if (process.env.PAPERMARK_SELFHOST === "1") return false;
   return (
     (process.env.NODE_ENV === "development" &&
       (host?.includes(".local") || host?.includes("papermark.dev"))) ||
