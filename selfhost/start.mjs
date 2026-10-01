@@ -1,6 +1,6 @@
 // One command to run the self-hosted Papermark: starts the embedded Postgres, applies the
 // Prisma migrations, then runs Next.js (`next start` after `npm run selfhost:build`, or
-// `next dev` with --dev). Stops Postgres when Next exits. See selfhost/README.md.
+// `next dev` with --dev; --build-only prepares a deploy and exits). Stops Postgres when Next exits. See selfhost/README.md.
 import { spawn } from "node:child_process";
 import { existsSync, readFileSync } from "node:fs";
 import { join } from "node:path";
@@ -8,7 +8,8 @@ import { join } from "node:path";
 
 const root = new URL("..", import.meta.url).pathname;
 const dev = process.argv.includes("--dev");
-const build = process.argv.includes("--build");
+const buildOnly = process.argv.includes("--build-only");
+const build = buildOnly || process.argv.includes("--build");
 
 // .env at the repo root, without overriding variables already set by the caller.
 const envFile = join(root, ".env");
@@ -46,6 +47,7 @@ try {
   await run("npx", ["prisma", "migrate", "deploy", "--schema", "prisma/schema"]);
   await run("npx", ["prisma", "generate", "--schema", "prisma/schema"]);
   if (build) await run("npx", ["next", "build"]);
+  if (buildOnly) await stop(0);
   const port = process.env.PORT ?? "3000";
   next = spawn("npx", ["next", dev ? "dev" : "start", "-p", port, "-H", process.env.HOST ?? "127.0.0.1"], {
     cwd: root,
