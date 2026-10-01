@@ -53,7 +53,14 @@ export const config = {
   ],
 };
 
-export default async function middleware(req: NextRequest, ev: NextFetchEvent) {
+export default async function middleware(incoming: NextRequest, ev: NextFetchEvent) {
+  // selfhost: `next start` builds request URLs from its listening address
+  // (http://localhost:3000), so redirects would leave the public site. Rebase the
+  // request on the public URL (NEXT_PUBLIC_BASE_URL) before any middleware uses it.
+  const publicBase = process.env.PAPERMARK_SELFHOST === "1" ? process.env.NEXT_PUBLIC_BASE_URL : undefined;
+  const req = publicBase
+    ? new NextRequest(new URL(incoming.nextUrl.pathname + incoming.nextUrl.search, publicBase), incoming)
+    : incoming;
   const path = req.nextUrl.pathname;
   const host = req.headers.get("host");
 
