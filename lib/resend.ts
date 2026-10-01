@@ -6,9 +6,12 @@ import { Resend } from "resend";
 import prisma from "@/lib/prisma";
 import { log, nanoid } from "@/lib/utils";
 
-export const resend = process.env.RESEND_API_KEY
-  ? new Resend(process.env.RESEND_API_KEY)
-  : null;
+// selfhost: "resend" is aliased to selfhost/shims/resend.ts (Amazon SES or a local
+// outbox), which needs no Resend API key.
+export const resend =
+  process.env.RESEND_API_KEY || process.env.PAPERMARK_SELFHOST === "1"
+    ? new Resend(process.env.RESEND_API_KEY)
+    : null;
 
 export const sendEmail = async ({
   to,

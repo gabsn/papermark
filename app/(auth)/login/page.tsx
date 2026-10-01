@@ -1,5 +1,7 @@
 import { Metadata } from "next";
 
+import { getEnabledAuthProviders } from "@/lib/auth/enabled-providers";
+
 import { GTMComponent } from "@/components/gtm-component";
 
 import LoginClient from "./page-client";
@@ -42,7 +44,8 @@ export default function LoginPage() {
   return (
     <>
       <GTMComponent />
-      <LoginClient />
+      {/* selfhost: hide sign-in methods that are not configured */}
+      <LoginClient providers={getEnabledAuthProviders()} />
     </>
   );
 }

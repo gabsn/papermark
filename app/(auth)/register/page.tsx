@@ -1,5 +1,7 @@
 import { Metadata } from "next";
 
+import { getEnabledAuthProviders } from "@/lib/auth/enabled-providers";
+
 import RegisterClient from "./page-client";
 
 const data = {
@@ -37,5 +39,6 @@ export const metadata: Metadata = {
 };
 
 export default function RegisterPage() {
-  return <RegisterClient />;
+  // selfhost: hide sign-in methods that are not configured
+  return <RegisterClient providers={getEnabledAuthProviders()} />;
 }

@@ -4,7 +4,14 @@ import {
   DomainVerificationResponse,
 } from "@/lib/types";
 
+// selfhost: without a Vercel project (PROJECT_ID_VERCEL) the operator points DNS and
+// TLS at the server themselves, so the Vercel domains API is skipped and every domain
+// reports as verified and correctly configured.
+const vercelDomainsDisabled =
+  process.env.PAPERMARK_SELFHOST === "1" && !process.env.PROJECT_ID_VERCEL;
+
 export const addDomainToVercel = async (domain: string) => {
+  if (vercelDomainsDisabled) return { name: domain.toLowerCase() };
   return await fetch(
     `https://api.vercel.com/v10/projects/${process.env.PROJECT_ID_VERCEL}/domains?teamId=${process.env.TEAM_ID_VERCEL}`,
     {
@@ -21,6 +28,7 @@ export const addDomainToVercel = async (domain: string) => {
 };
 
 export const removeDomainFromVercelProject = async (domain: string) => {
+  if (vercelDomainsDisabled) return {};
   return await fetch(
     `https://api.vercel.com/v9/projects/${process.env.PROJECT_ID_VERCEL}/domains/${domain}?teamId=${process.env.TEAM_ID_VERCEL}`,
     {
@@ -33,6 +41,7 @@ export const removeDomainFromVercelProject = async (domain: string) => {
 };
 
 export const removeDomainFromVercelTeam = async (domain: string) => {
+  if (vercelDomainsDisabled) return {};
   return await fetch(
     `https://api.vercel.com/v6/domains/${domain}?teamId=${process.env.TEAM_ID_VERCEL}`,
     {
@@ -63,6 +72,18 @@ export const removeDomainFromVercel = async (
 export const getDomainResponse = async (
   domain: string,
 ): Promise<DomainResponse & { error: { code: string; message: string } }> => {
+  if (vercelDomainsDisabled) {
+    const name = domain.toLowerCase();
+    return {
+      name,
+      apexName: getApexDomain(`https://${name}`),
+      projectId: "selfhost",
+      verified: true,
+      verification: [],
+    } as unknown as DomainResponse & {
+      error: { code: string; message: string };
+    };
+  }
   return await fetch(
     `https://api.vercel.com/v9/projects/${process.env.PROJECT_ID_VERCEL}/domains/${domain.toLowerCase()}?teamId=${process.env.TEAM_ID_VERCEL}`,
     {
@@ -80,6 +101,7 @@ export const getDomainResponse = async (
 export const getConfigResponse = async (
   domain: string,
 ): Promise<DomainConfigResponse> => {
+  if (vercelDomainsDisabled) return { misconfigured: false, conflicts: [] };
   return await fetch(
     `https://api.vercel.com/v6/domains/${domain.toLowerCase()}/config?teamId=${process.env.TEAM_ID_VERCEL}`,
     {
@@ -95,6 +117,15 @@ export const getConfigResponse = async (
 export const verifyDomain = async (
   domain: string,
 ): Promise<DomainVerificationResponse> => {
+  if (vercelDomainsDisabled) {
+    const name = domain.toLowerCase();
+    return {
+      name,
+      apexName: getApexDomain(`https://${name}`),
+      projectId: "selfhost",
+      verified: true,
+    };
+  }
   return await fetch(
     `https://api.vercel.com/v9/projects/${process.env.PROJECT_ID_VERCEL}/domains/${domain.toLowerCase()}/verify?teamId=${process.env.TEAM_ID_VERCEL}`,
     {

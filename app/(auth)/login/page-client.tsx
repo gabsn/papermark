@@ -12,6 +12,7 @@ import { signIn } from "next-auth/react";
 import { toast } from "sonner";
 import { z } from "zod";
 
+import type { EnabledAuthProviders } from "@/lib/auth/enabled-providers";
 import { cn } from "@/lib/utils";
 
 import { LastUsed, useLastUsed } from "@/components/hooks/useLastUsed";
@@ -23,7 +24,11 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 
-export default function Login() {
+export default function Login({
+  providers = { google: true, linkedin: true, passkey: true },
+}: {
+  providers?: EnabledAuthProviders;
+}) {
   const router = useRouter();
   const searchParams = useSearchParams();
   const next = searchParams?.get("next") ?? undefined;
@@ -159,71 +164,78 @@ export default function Login() {
           </form>
           <p className="py-4 text-center">or</p>
           <div className="flex flex-col space-y-2 px-4 sm:px-12">
-            <div className="relative">
-              <Button
-                onClick={() => {
-                  setClickedMethod("google");
-                  setLastUsed("google");
-                  signIn("google", {
-                    ...(next && next.length > 0 ? { callbackUrl: next } : {}),
-                  }).then((res) => {
-                    setClickedMethod(undefined);
-                  });
-                }}
-                loading={clickedMethod === "google"}
-                disabled={clickedMethod && clickedMethod !== "google"}
-                className="flex w-full items-center justify-center space-x-2 border border-gray-300 bg-gray-100 font-normal text-gray-900 hover:bg-gray-200"
-              >
-                <Google className="h-5 w-5" />
-                <span>Continue with Google</span>
-                {clickedMethod !== "google" && lastUsed === "google" && (
-                  <LastUsed />
-                )}
-              </Button>
-            </div>
-            <div className="relative">
-              <Button
-                onClick={() => {
-                  setClickedMethod("linkedin");
-                  setLastUsed("linkedin");
-                  signIn("linkedin", {
-                    ...(next && next.length > 0 ? { callbackUrl: next } : {}),
-                  }).then((res) => {
-                    setClickedMethod(undefined);
-                  });
-                }}
-                loading={clickedMethod === "linkedin"}
-                disabled={clickedMethod && clickedMethod !== "linkedin"}
-                className="flex w-full items-center justify-center space-x-2 border border-gray-300 bg-gray-100 font-normal text-gray-900 hover:bg-gray-200"
-              >
-                <LinkedIn />
-                <span>Continue with LinkedIn</span>
-                {clickedMethod !== "linkedin" && lastUsed === "linkedin" && (
-                  <LastUsed />
-                )}
-              </Button>
-            </div>
-            <div className="relative">
-              <Button
-                onClick={() => {
-                  setLastUsed("passkey");
-                  setClickedMethod("passkey");
-                  signInWithPasskey({
-                    tenantId: process.env.NEXT_PUBLIC_HANKO_TENANT_ID as string,
-                  }).then(() => {
-                    setClickedMethod(undefined);
-                  });
-                }}
-                variant="outline"
-                loading={clickedMethod === "passkey"}
-                disabled={clickedMethod && clickedMethod !== "passkey"}
-                className="flex w-full items-center justify-center space-x-2 border border-gray-300 bg-gray-100 font-normal text-gray-900 hover:bg-gray-200 hover:text-gray-900"
-              >
-                <Passkey className="h-4 w-4" />
-                <span>Continue with a passkey</span>
-                {lastUsed === "passkey" && <LastUsed />}
-              </Button>
-            </div>
+            {providers.google && (
+              <div className="relative">
+                <Button
+                  onClick={() => {
+                    setClickedMethod("google");
+                    setLastUsed("google");
+                    signIn("google", {
+                      ...(next && next.length > 0 ? { callbackUrl: next } : {}),
+                    }).then((res) => {
+                      setClickedMethod(undefined);
+                    });
+                  }}
+                  loading={clickedMethod === "google"}
+                  disabled={clickedMethod && clickedMethod !== "google"}
+                  className="flex w-full items-center justify-center space-x-2 border border-gray-300 bg-gray-100 font-normal text-gray-900 hover:bg-gray-200"
+                >
+                  <Google className="h-5 w-5" />
+                  <span>Continue with Google</span>
+                  {clickedMethod !== "google" && lastUsed === "google" && (
+                    <LastUsed />
+                  )}
+                </Button>
+              </div>
+            )}
+            {providers.linkedin && (
+              <div className="relative">
+                <Button
+                  onClick={() => {
+                    setClickedMethod("linkedin");
+                    setLastUsed("linkedin");
+                    signIn("linkedin", {
+                      ...(next && next.length > 0 ? { callbackUrl: next } : {}),
+                    }).then((res) => {
+                      setClickedMethod(undefined);
+                    });
+                  }}
+                  loading={clickedMethod === "linkedin"}
+                  disabled={clickedMethod && clickedMethod !== "linkedin"}
+                  className="flex w-full items-center justify-center space-x-2 border border-gray-300 bg-gray-100 font-normal text-gray-900 hover:bg-gray-200"
+                >
+                  <LinkedIn />
+                  <span>Continue with LinkedIn</span>
+                  {clickedMethod !== "linkedin" && lastUsed === "linkedin" && (
+                    <LastUsed />
+                  )}
+                </Button>
+              </div>
+            )}
+            {providers.passkey && (
+              <div className="relative">
+                <Button
+                  onClick={() => {
+                    setLastUsed("passkey");
+                    setClickedMethod("passkey");
+                    signInWithPasskey({
+                      tenantId: process.env
+                        .NEXT_PUBLIC_HANKO_TENANT_ID as string,
+                    }).then(() => {
+                      setClickedMethod(undefined);
+                    });
+                  }}
+                  variant="outline"
+                  loading={clickedMethod === "passkey"}
+                  disabled={clickedMethod && clickedMethod !== "passkey"}
+                  className="flex w-full items-center justify-center space-x-2 border border-gray-300 bg-gray-100 font-normal text-gray-900 hover:bg-gray-200 hover:text-gray-900"
+                >
+                  <Passkey className="h-4 w-4" />
+                  <span>Continue with a passkey</span>
+                  {lastUsed === "passkey" && <LastUsed />}
+                </Button>
+              </div>
+            )}
             <div className="relative">
               <SSOLogin autoExpand={isSSORequired} />
             </div>

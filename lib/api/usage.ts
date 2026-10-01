@@ -111,7 +111,11 @@ const axiom =
 
 // Reuses the app's existing project key; posts to the PostHog EU region
 // (matches the browser proxy target in lib/middleware/posthog.ts).
-const POSTHOG_KEY = process.env.NEXT_PUBLIC_POSTHOG_KEY;
+// selfhost: no API usage events to PostHog.
+const POSTHOG_KEY =
+  process.env.PAPERMARK_SELFHOST === "1"
+    ? undefined
+    : process.env.NEXT_PUBLIC_POSTHOG_KEY;
 const POSTHOG_HOST = "https://eu.i.posthog.com";
 
 function hasSinkConfigured(): boolean {

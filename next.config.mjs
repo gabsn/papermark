@@ -13,6 +13,7 @@ const SELFHOST_ALIASES = {
   "@tus/s3-store$": shim("tus-s3-store"),
   "@trigger.dev/sdk$": shim("trigger-sdk"),
   "@trigger.dev/sdk/v3$": shim("trigger-sdk"),
+  "@trigger.dev/react-hooks$": shim("trigger-react-hooks"),
   "@upstash/qstash$": shim("upstash-qstash"),
   "@vercel/functions$": shim("vercel-functions"),
   "@chronark/zod-bird$": shim("zod-bird"),
@@ -345,6 +346,8 @@ const nextConfig = {
     ];
   },
   experimental: {
+    // Self-hosted build: instrumentation.ts starts the background job worker.
+    instrumentationHook: process.env.PAPERMARK_SELFHOST === "1",
     // Rewrite barrel imports (e.g. `import { Icon } from "lucide-react"`) to
     // direct submodule imports at build time. Cuts dev boot, cold starts and
     // HMR for these large re-export packages without losing ergonomic imports.
@@ -374,11 +377,15 @@ const nextConfig = {
     // load, which breaks when webpack bundles it into app-router routes.
     serverComponentsExternalPackages: ["oidc-provider", "koa", "jsonpath"],
   },
-  webpack: (config, { isServer }) => {
+  webpack: (config, { isServer, nextRuntime }) => {
     // Self-hosted build (PAPERMARK_SELFHOST=1): every hosted service is replaced by a
     // local module with the same API (selfhost/shims, selfhost/README.md).
     if (process.env.PAPERMARK_SELFHOST === "1") {
       Object.assign(config.resolve.alias, SELFHOST_ALIASES);
+      // The Edge runtime (middleware) has no node:fs: it gets a read-only, empty Redis.
+      if (nextRuntime === "edge") {
+        config.resolve.alias["@upstash/redis$"] = shim("upstash-redis.edge");
+      }
     }
     // oidc-provider depends on Koa which uses dynamic requires webpack can't
     // statically analyze. Mark it external on the server so Node's require()
@@ -470,6 +477,17 @@ function prepareRemotePatterns() {
     patterns.push({
       protocol: "https",
       hostname: process.env.NEXT_PRIVATE_ADVANCED_UPLOAD_DISTRIBUTION_HOST_US,
+    });
+  }
+
+  // selfhost: stored files and public blobs are served by the app itself.
+  if (process.env.PAPERMARK_SELFHOST === "1" && process.env.NEXT_PUBLIC_BASE_URL) {
+    const { protocol, hostname, port } = new URL(process.env.NEXT_PUBLIC_BASE_URL);
+    patterns.push({
+      protocol: protocol.replace(":", ""),
+      hostname,
+      ...(port && { port }),
+      pathname: "/api/selfhost/**",
     });
   }
 

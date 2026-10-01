@@ -2,7 +2,9 @@ import { NextResponse } from "next/server";
 
 import { getFeatureFlags } from "@/lib/featureFlags";
 
-export const runtime = "edge";
+// selfhost: Node runtime so flags come from the same local config (read from disk by
+// selfhost/shims/vercel-edge-config.ts) as the server-side getFeatureFlags calls.
+export const runtime = "nodejs";
 
 export async function GET(request: Request) {
   const { searchParams } = new URL(request.url);

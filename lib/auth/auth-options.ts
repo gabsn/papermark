@@ -8,6 +8,7 @@ import GoogleProvider from "next-auth/providers/google";
 import LinkedInProvider from "next-auth/providers/linkedin";
 
 import { identifyUser, trackAnalytics } from "@/lib/analytics";
+import { getEnabledAuthProviders } from "@/lib/auth/enabled-providers";
 import { qstash } from "@/lib/cron";
 import { sendVerificationRequestEmail } from "@/lib/emails/send-verification-request";
 import hanko from "@/lib/hanko";
@@ -16,6 +17,9 @@ import prisma from "@/lib/prisma";
 import { CustomUser } from "@/lib/types";
 
 const VERCEL_DEPLOYMENT = !!process.env.VERCEL_URL;
+
+// selfhost: Google, LinkedIn and passkeys only when configured.
+const enabledAuthProviders = getEnabledAuthProviders();
 
 function getMainDomainUrl(): string {
   if (process.env.NODE_ENV === "development") {
@@ -29,31 +33,39 @@ export const authOptions: NextAuthOptions = {
     error: "/login",
   },
   providers: [
-    GoogleProvider({
-      clientId: process.env.GOOGLE_CLIENT_ID as string,
-      clientSecret: process.env.GOOGLE_CLIENT_SECRET as string,
-      allowDangerousEmailAccountLinking: true,
-    }),
-    LinkedInProvider({
-      clientId: process.env.LINKEDIN_CLIENT_ID as string,
-      clientSecret: process.env.LINKEDIN_CLIENT_SECRET as string,
-      authorization: {
-        params: { scope: "openid profile email" },
-      },
-      issuer: "https://www.linkedin.com/oauth",
-      jwks_endpoint: "https://www.linkedin.com/oauth/openid/jwks",
-      profile(profile, tokens) {
-        const defaultImage =
-          "https://cdn-icons-png.flaticon.com/512/174/174857.png";
-        return {
-          id: profile.sub,
-          name: profile.name,
-          email: profile.email,
-          image: profile.picture ?? defaultImage,
-        };
-      },
-      allowDangerousEmailAccountLinking: true,
-    }),
+    ...(enabledAuthProviders.google
+      ? [
+          GoogleProvider({
+            clientId: process.env.GOOGLE_CLIENT_ID as string,
+            clientSecret: process.env.GOOGLE_CLIENT_SECRET as string,
+            allowDangerousEmailAccountLinking: true,
+          }),
+        ]
+      : []),
+    ...(enabledAuthProviders.linkedin
+      ? [
+          LinkedInProvider({
+            clientId: process.env.LINKEDIN_CLIENT_ID as string,
+            clientSecret: process.env.LINKEDIN_CLIENT_SECRET as string,
+            authorization: {
+              params: { scope: "openid profile email" },
+            },
+            issuer: "https://www.linkedin.com/oauth",
+            jwks_endpoint: "https://www.linkedin.com/oauth/openid/jwks",
+            profile(profile, tokens) {
+              const defaultImage =
+                "https://cdn-icons-png.flaticon.com/512/174/174857.png";
+              return {
+                id: profile.sub,
+                name: profile.name,
+                email: profile.email,
+                image: profile.picture ?? defaultImage,
+              };
+            },
+            allowDangerousEmailAccountLinking: true,
+          }),
+        ]
+      : []),
     EmailProvider({
       async sendVerificationRequest({ identifier, url }) {
         const hasValidNextAuthUrl = !!process.env.NEXTAUTH_URL;
@@ -84,14 +96,20 @@ export const authOptions: NextAuthOptions = {
         }
       },
     }),
-    PasskeyProvider({
-      tenant: hanko,
-      async authorize({ userId }) {
-        const user = await prisma.user.findUnique({ where: { id: userId } });
-        if (!user) return null;
-        return user;
-      },
-    }),
+    ...(hanko
+      ? [
+          PasskeyProvider({
+            tenant: hanko,
+            async authorize({ userId }) {
+              const user = await prisma.user.findUnique({
+                where: { id: userId },
+              });
+              if (!user) return null;
+              return user;
+            },
+          }),
+        ]
+      : []),
     {
       id: "saml",
       name: "BoxyHQ SAML",
@@ -113,8 +131,7 @@ export const authOptions: NextAuthOptions = {
       userinfo: `${getMainDomainUrl()}/api/auth/saml/userinfo`,
       profile: async (profile) => {
         const name =
-          `${profile.firstName || ""} ${profile.lastName || ""}`.trim() ||
-          null;
+          `${profile.firstName || ""} ${profile.lastName || ""}`.trim() || null;
 
         return {
           id: profile.id || profile.email,

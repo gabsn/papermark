@@ -1,6 +1,11 @@
 import { NextRequest, NextResponse } from "next/server";
 
 export default async function PostHogMiddleware(req: NextRequest) {
+  // selfhost: never proxy analytics to PostHog; acknowledge and drop.
+  if (process.env.PAPERMARK_SELFHOST === "1") {
+    return new NextResponse(null, { status: 204 });
+  }
+
   let url = req.nextUrl.clone();
   const hostname = url.pathname.startsWith("/ingest/static/")
     ? "eu-assets.i.posthog.com"

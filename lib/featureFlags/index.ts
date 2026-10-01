@@ -111,7 +111,8 @@ export const getFeatureFlags = async ({ teamId }: { teamId?: string }) => {
 
   if (betaFeatures) {
     for (const [featureFlag, teamIds] of Object.entries(betaFeatures)) {
-      if (teamIds.includes(teamId)) {
+      // selfhost: "*" enables a feature for every team (selfhost/shims/vercel-edge-config.ts).
+      if (teamIds.includes(teamId) || teamIds.includes("*")) {
         teamFeatures[featureFlag as BetaFeatures] = true;
       }
     }
