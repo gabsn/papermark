@@ -37,6 +37,13 @@ export default async function handler(
     return res.status(401).json({ error: "Unauthorized" });
   }
 
+  // selfhost: Slack is not configured, so no team has it installed.
+  if (process.env.PAPERMARK_SELFHOST === "1" && !process.env.SLACK_CLIENT_ID) {
+    return req.method === "GET"
+      ? res.status(200).json(null)
+      : res.status(404).json({ error: "Slack is not configured" });
+  }
+
   const { teamId } = req.query as { teamId: string };
   const userId = (session.user as CustomUser).id;
 

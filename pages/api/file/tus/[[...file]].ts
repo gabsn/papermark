@@ -62,6 +62,11 @@ const tusServer = new Server({
   generateUrl(req, { proto, host, path, id }) {
     // Encode the ID to be URL safe
     id = Buffer.from(id, "utf-8").toString("base64url");
+    // selfhost: behind CloudFront the Host header is the origin's (the Funnel name), so
+    // build upload URLs on the public base URL instead.
+    if (process.env.PAPERMARK_SELFHOST === "1" && process.env.NEXT_PUBLIC_BASE_URL) {
+      return `${process.env.NEXT_PUBLIC_BASE_URL}${path}/${id}`;
+    }
     return `${proto}://${host}${path}/${id}`;
   },
   getFileIdFromRequest(req) {
