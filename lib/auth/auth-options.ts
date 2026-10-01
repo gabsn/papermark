@@ -210,6 +210,18 @@ export const authOptions: NextAuthOptions = {
     },
   },
   callbacks: {
+    // selfhost: only the addresses in SELFHOST_ALLOWED_EMAILS (comma-separated emails or
+    // "@domain" entries) may sign in to the dashboard. Viewers of shared links never sign in.
+    // NextAuth runs this before sending the email code, so strangers get no code at all.
+    signIn: async ({ user, email }) => {
+      if (process.env.PAPERMARK_SELFHOST !== "1") return true;
+      const address = (user?.email ?? (email as { email?: string } | undefined)?.email ?? "").toLowerCase();
+      const allowed = (process.env.SELFHOST_ALLOWED_EMAILS ?? "")
+        .split(",")
+        .map((x) => x.trim().toLowerCase())
+        .filter(Boolean);
+      return allowed.some((a) => (a.startsWith("@") ? address.endsWith(a) : address === a));
+    },
     jwt: async (params) => {
       const { token, user, trigger, account } = params;
       if (!token.email) {
