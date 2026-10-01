@@ -1,3 +1,29 @@
+import { fileURLToPath } from "node:url";
+
+const shim = (name) => fileURLToPath(new URL(`./selfhost/shims/${name}.ts`, import.meta.url));
+// Package → local replacement. The `$` suffix keeps sub-paths (e.g. "@vercel/blob/client") separate.
+const SELFHOST_ALIASES = {
+  "@aws-sdk/client-s3$": shim("aws-client-s3"),
+  "@aws-sdk/s3-request-presigner$": shim("aws-s3-request-presigner"),
+  "@aws-sdk/lib-storage$": shim("aws-lib-storage"),
+  "@aws-sdk/cloudfront-signer$": shim("aws-cloudfront-signer"),
+  "@aws-sdk/client-lambda$": shim("aws-client-lambda"),
+  "@vercel/blob$": shim("vercel-blob"),
+  "@vercel/blob/client$": shim("vercel-blob-client"),
+  "@tus/s3-store$": shim("tus-s3-store"),
+  "@trigger.dev/sdk$": shim("trigger-sdk"),
+  "@trigger.dev/sdk/v3$": shim("trigger-sdk"),
+  "@upstash/qstash$": shim("upstash-qstash"),
+  "@vercel/functions$": shim("vercel-functions"),
+  "@chronark/zod-bird$": shim("zod-bird"),
+  "@upstash/redis$": shim("upstash-redis"),
+  "@upstash/ratelimit$": shim("upstash-ratelimit"),
+  "@vercel/edge-config$": shim("vercel-edge-config"),
+  resend$: shim("resend"),
+  "posthog-js$": shim("posthog-js"),
+  "posthog-js/react$": shim("posthog-js-react"),
+};
+
 /** @type {import('next').NextConfig} */
 const nextConfig = {
   reactStrictMode: true,
@@ -349,6 +375,11 @@ const nextConfig = {
     serverComponentsExternalPackages: ["oidc-provider", "koa", "jsonpath"],
   },
   webpack: (config, { isServer }) => {
+    // Self-hosted build (PAPERMARK_SELFHOST=1): every hosted service is replaced by a
+    // local module with the same API (selfhost/shims, selfhost/README.md).
+    if (process.env.PAPERMARK_SELFHOST === "1") {
+      Object.assign(config.resolve.alias, SELFHOST_ALIASES);
+    }
     // oidc-provider depends on Koa which uses dynamic requires webpack can't
     // statically analyze. Mark it external on the server so Node's require()
     // resolves it from node_modules at runtime.
