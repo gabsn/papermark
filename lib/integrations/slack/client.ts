@@ -33,7 +33,8 @@ export class SlackClient {
     this.clientId = process.env.SLACK_CLIENT_ID as string;
     this.clientSecret = process.env.SLACK_CLIENT_SECRET as string;
 
-    if (!this.clientId || !this.clientSecret) {
+    // selfhost: Slack is optional; without keys no team can install it, so nothing calls Slack.
+    if ((!this.clientId || !this.clientSecret) && process.env.PAPERMARK_SELFHOST !== "1") {
       throw new Error("SLACK_CLIENT_ID and SLACK_CLIENT_SECRET must be set");
     }
   }

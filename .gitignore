@@ -82,3 +82,5 @@ _public/
 
 .opencode
 plans/
+# self-hosted data (selfhost/README.md)
+.data/

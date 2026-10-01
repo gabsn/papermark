@@ -5,7 +5,6 @@ import { spawn } from "node:child_process";
 import { existsSync, readFileSync } from "node:fs";
 import { join } from "node:path";
 
-import { DATABASE_URL, DATA_DIR, startPostgres } from "./postgres.mjs";
 
 const root = new URL("..", import.meta.url).pathname;
 const dev = process.argv.includes("--dev");
@@ -20,6 +19,8 @@ if (existsSync(envFile)) {
   }
 }
 process.env.PAPERMARK_SELFHOST = "1";
+// Imported after .env is read: postgres.mjs takes PAPERMARK_DATA and the port from the environment.
+const { DATABASE_URL, DATA_DIR, startPostgres } = await import("./postgres.mjs");
 process.env.PAPERMARK_DATA = DATA_DIR;
 process.env.POSTGRES_PRISMA_URL ??= DATABASE_URL;
 process.env.POSTGRES_PRISMA_URL_NON_POOLING ??= DATABASE_URL;

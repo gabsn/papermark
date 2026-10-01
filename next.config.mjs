@@ -34,7 +34,21 @@ const nextConfig = {
   ...(process.env.PAPERMARK_SELFHOST === "1" ? { typescript: { tsconfigPath: "tsconfig.selfhost.json" } } : {}),
   reactStrictMode: true,
   pageExtensions: ["js", "jsx", "ts", "tsx", "mdx"],
-  transpilePackages: ["@boxyhq/saml-jackson", "@libpdf/core"],
+  transpilePackages: [
+    "@boxyhq/saml-jackson",
+    "@libpdf/core",
+    // selfhost: bundle the replaced packages, so the aliases apply on the server too
+    // (Next would otherwise load them from node_modules as externals).
+    ...(process.env.PAPERMARK_SELFHOST === "1"
+      ? [
+          ...new Set(
+            Object.keys(SELFHOST_ALIASES)
+              .filter((k) => !k.startsWith("@/"))
+              .map((k) => k.replace(/\$$/, "").split("/").slice(0, k.startsWith("@") ? 2 : 1).join("/")),
+          ),
+        ]
+      : []),
+  ],
   images: {
     minimumCacheTTL: 2592000, // 30 days
     remotePatterns: prepareRemotePatterns(),
