@@ -3,6 +3,9 @@ import { fileURLToPath } from "node:url";
 const shim = (name) => fileURLToPath(new URL(`./selfhost/shims/${name}.ts`, import.meta.url));
 // Package → local replacement. The `$` suffix keeps sub-paths (e.g. "@vercel/blob/client") separate.
 const SELFHOST_ALIASES = {
+  // ee/ is under the Papermark Commercial License (and partly unpublished): the self-hosted
+  // build uses our own modules in selfhost/ee instead (selfhost/README.md).
+  "@/ee": fileURLToPath(new URL("./selfhost/ee", import.meta.url)),
   "@aws-sdk/client-s3$": shim("aws-client-s3"),
   "@aws-sdk/s3-request-presigner$": shim("aws-s3-request-presigner"),
   "@aws-sdk/lib-storage$": shim("aws-lib-storage"),

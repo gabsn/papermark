@@ -1,0 +1,21 @@
+{
+  "extends": "./tsconfig.json",
+  "compilerOptions": {
+    "paths": {
+      "@/ee/*": [
+        "./selfhost/ee/*"
+      ],
+      "@/*": [
+        "./*"
+      ]
+    }
+  },
+  "exclude": [
+    "node_modules",
+    "ee",
+    "app/(ee)",
+    "scripts",
+    "**/*.verify.ts",
+    "trigger.config.ts"
+  ]
+}
