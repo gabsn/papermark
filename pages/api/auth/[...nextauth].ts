@@ -34,6 +34,15 @@ const getAuthOptions = (req: NextApiRequest): NextAuthOptions => {
     callbacks: {
       ...authOptions.callbacks,
       signIn: async ({ user, account, profile }) => {
+        // selfhost: dashboard sign-in allow list (lib/auth/auth-options.ts, SELFHOST_ALLOWED_EMAILS).
+        if (
+          authOptions.callbacks?.signIn &&
+          !(await authOptions.callbacks.signIn({ user, account, profile } as Parameters<
+            NonNullable<typeof authOptions.callbacks.signIn>
+          >[0]))
+        ) {
+          return false;
+        }
         if (!user.email || (await isBlacklistedEmail(user.email))) {
           await identifyUser(user.email ?? user.id);
           await trackAnalytics({
