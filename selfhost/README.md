@@ -85,5 +85,11 @@ to `/api/webhooks/signing`), `NEXT_PUBLIC_SIGNING_TEAM_URL`. Owner account gabin
   `success@simulator.amazonses.com`, signs the NDA in the embedded Documenso, enters the email
   code read from the database, and checks that the 16 pages render with the viewer's watermark
   and no download button; then deletes its Documenso envelope and agreement response. On failure
-  it emails `QA_ALERT_EMAIL` and leaves a screenshot in `<data>/qa/last.png`. No dependency: it
+  it emails `QA_ALERT_EMAIL` and leaves a screenshot in `<data>/qa/last.png`; the job wrapper
+  (gabsn/mini `jobs/deck-qa/run`) also reports to focustree's `qa-alert-relay.yml` (SMS when it
+  breaks or recovers).
+- Backups: gabsn/mini job `deck-backup` (03:15) dumps both databases (signed NDAs live in
+  Documenso's) and Papermark's files to S3 `focustree-deck-backups/<date>/`, kept 90 days.
+- Signed NDAs: Documenso's pre-signed download URLs need S3, so the fork fetches the signed PDF
+  from `/envelope/item/{id}/download` and keeps it in Papermark's storage. No dependency: it
   drives Chrome through `selfhost/qa/cdp.mjs` (Node's built-in WebSocket).
