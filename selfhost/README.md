@@ -8,7 +8,9 @@ cp selfhost/env.example .env       # fill the secrets, the public URL, SELFHOST_
 npm ci
 node selfhost/start.mjs --build    # Postgres + migrations + next build + next start on :3000
 node selfhost/start.mjs --dev      # same with next dev
-selfhost/redeploy.sh               # on the Mini: pull, build, restart the launchd service
+selfhost/deploy.sh                 # on the Mini: deploy origin/main if not already deployed (idempotent)
+selfhost/redeploy.sh               # on the Mini: force a rebuild and restart
+node selfhost/qa/deck-e2e.mjs      # end-to-end buyer flow check on the public URL
 ```
 
 `NEXT_PUBLIC_*` values are baked into the build: set the public URL in `.env` before building.
@@ -76,4 +78,12 @@ to `/api/webhooks/signing`), `NEXT_PUBLIC_SIGNING_TEAM_URL`. Owner account gabin
   `~/Library/Logs/mini/<job>.log`, data `~/.local/share/papermark`.
 - Public URLs: https://deck.focustree.app and https://sign.focustree.app (CloudFront, Focus Tree
   CDK stack `Deck`) → Tailscale Funnel 443 → `127.0.0.1:3000` and 8443 → `127.0.0.1:3100`.
-- Redeploy Papermark: `selfhost/redeploy.sh`.
+- Deploy: `selfhost/deploy.sh` is the `papermark` job's setup, so every `bin/mini install` runs it;
+  it rebuilds only when origin/main differs from `.deployed-commit`. Force with `selfhost/redeploy.sh`.
+- QA: `node selfhost/qa/deck-e2e.mjs` (daily job `deck-qa`) opens the internal link `QA_LINK_ID` (a
+  copy of the deck, same NDA agreement, notifications off) in a headless Chrome as
+  `success@simulator.amazonses.com`, signs the NDA in the embedded Documenso, enters the email
+  code read from the database, and checks that the 16 pages render with the viewer's watermark
+  and no download button; then deletes its Documenso envelope and agreement response. On failure
+  it emails `QA_ALERT_EMAIL` and leaves a screenshot in `<data>/qa/last.png`. No dependency: it
+  drives Chrome through `selfhost/qa/cdp.mjs` (Node's built-in WebSocket).

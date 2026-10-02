@@ -63,7 +63,8 @@ export async function launch() {
   const waitFor = async (expression, frameUrl, ms = 30000) => {
     const end = Date.now() + ms;
     while (Date.now() < end) {
-      const v = await evaluate(expression, frameUrl).catch(() => undefined);
+      // DOM nodes don't serialize: report them as true.
+      const v = await evaluate(`(() => { const v = (${expression}); return v instanceof Node ? true : v; })()`, frameUrl).catch(() => undefined);
       if (v) return v;
       await sleep(500);
     }
@@ -71,6 +72,12 @@ export async function launch() {
   };
   const type = (text) => cdp("Input.insertText", { text });
   const screenshot = async () => Buffer.from((await cdp("Page.captureScreenshot", { format: "png" })).data, "base64");
-  const close = () => { try { ws.close(); } catch {} chrome.kill("SIGKILL"); rmSync(profile, { recursive: true, force: true }); };
+  const close = async () => {
+    try { ws.close(); } catch {}
+    const exited = new Promise((r) => chrome.once("exit", r));
+    chrome.kill("SIGKILL");
+    await Promise.race([exited, sleep(5000)]);
+    rmSync(profile, { recursive: true, force: true, maxRetries: 5, retryDelay: 200 });
+  };
   return { cdp, evaluate, waitFor, type, screenshot, close };
 }
