@@ -48,8 +48,12 @@ const startedAt = new Date();
 let envelopeId = null;
 try {
   log("open link");
+  // The first request after a deploy compiles and warms the app: allow a minute, then reload once.
   await b.cdp("Page.navigate", { url: `${BASE}/view/${LINK}` });
-  await b.waitFor("document.querySelector('input[name=email]')");
+  await b.waitFor("document.querySelector('input[name=email]')", null, 60000).catch(async () => {
+    await b.cdp("Page.navigate", { url: `${BASE}/view/${LINK}` });
+    await b.waitFor("document.querySelector('input[name=email]')", null, 60000);
+  });
 
   log("name and email");
   await b.evaluate("document.querySelector('input[name=name]').focus()");
