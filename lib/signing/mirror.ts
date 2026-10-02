@@ -6,7 +6,7 @@ import { assertS3Transport } from "@/lib/files/transport";
 import prisma from "@/lib/prisma";
 import { buildContentDisposition, safeSlugify } from "@/lib/utils";
 
-import { getEnvelopeSignedDownloadUrl } from "./envelopes";
+import { fetchEnvelopeSignedPdf, getEnvelopeSignedDownloadUrl } from "./envelopes";
 
 // Documenso caps signed PDFs at 50 MB by default; mirror with the same ceiling
 // so a malformed upstream response can never blow out our process memory.
@@ -160,12 +160,16 @@ export const mirrorSignedAgreementToStorage = async ({
     return { mirrored: false, reason: "missing-envelope" as const };
   }
 
-  const { url } = await getEnvelopeSignedDownloadUrl({
-    envelopeId: response.signingEnvelopeId,
-    documentId: response.signingDocumentId,
-  });
-
-  const body = await fetchSignedPdf(url);
+  const body = process.env.PAPERMARK_SELFHOST
+    ? await fetchEnvelopeSignedPdf(response.signingEnvelopeId)
+    : await fetchSignedPdf(
+        (
+          await getEnvelopeSignedDownloadUrl({
+            envelopeId: response.signingEnvelopeId,
+            documentId: response.signingDocumentId,
+          })
+        ).url,
+      );
 
   const teamId = response.agreement.teamId;
   const agreementId = response.agreement.id;

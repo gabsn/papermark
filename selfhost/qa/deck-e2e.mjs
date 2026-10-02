@@ -1,7 +1,7 @@
 // End-to-end check of the buyer flow on the public URL, as a buyer would live it:
 // open the QA link → name and email → sign the NDA in the embedded Documenso → email code (read
 // from the database: the SES simulator address receives nothing) → the deck renders, with the
-// viewer's watermark and no download button. Exits 1 with the failed step; screenshot in
+// viewer's watermark and no download button; the signed NDA downloads as a PDF. Exits 1 with the failed step; screenshot in
 // $PAPERMARK_DATA/qa/. Then deletes the signed QA envelope in Documenso.
 // On failure it also emails QA_ALERT_EMAIL through SES (the daily `deck-qa` job in gabsn/mini).
 // Usage: node selfhost/qa/deck-e2e.mjs [linkId]   (default: QA_LINK_ID from .env)
@@ -109,6 +109,11 @@ try {
   });
   if (response?.signingStatus !== "COMPLETED") throw new Error(`agreement response is ${response?.signingStatus ?? "missing"}`);
   envelopeId = response.signingEnvelopeId;
+
+  log("signed NDA downloads as a PDF");
+  const dl = await b.evaluate(`fetch('/api/agreements/signing/${response.id}/download').then(async r => r.status + ' ' + r.headers.get('content-type') + ' ' + (await r.arrayBuffer()).byteLength)`);
+  const [status, type, bytes] = dl.split(" ");
+  if (status !== "200" || !type.includes("pdf") || Number(bytes) < 10000) throw new Error(`signed NDA download: ${dl}`);
 
   log("continue: email code");
   await b.evaluate("[...document.querySelectorAll('button')].find(x=>x.innerText.trim()==='Continue').click()");

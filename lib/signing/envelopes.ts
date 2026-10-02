@@ -1,6 +1,6 @@
 import { TeamError } from "@/lib/errorHandler";
 
-import { getSigningClient } from "./client";
+import { getSigningApiUrl, getSigningClient } from "./client";
 
 /** O(1) keyed lookup of a Documenso V2 envelope by its `envelopeId` — prefer over the old paginated find/filter helpers wherever the id is known. */
 export const getEnvelope = (envelopeId: string) =>
@@ -59,4 +59,34 @@ export const getEnvelopeSignedDownloadUrl = async ({
   }
 
   return { url };
+};
+
+/**
+ * Self-hosted: the signed PDF's bytes, straight from the Documenso API. Its pre-signed download
+ * URLs need S3 storage, which a self-hosted Documenso storing documents in its database lacks
+ * ("Document downloads are only available when S3 storage is configured").
+ */
+export const fetchEnvelopeSignedPdf = async (envelopeId: string): Promise<Buffer> => {
+  const envelope = await getEnvelope(envelopeId);
+  const primaryItem =
+    envelope.envelopeItems.find((item) => item.order === 1) ??
+    envelope.envelopeItems[0];
+  if (!primaryItem) {
+    throw new TeamError(
+      "Signed agreement file could not be located in the signing envelope.",
+    );
+  }
+  const response = await fetch(
+    `${getSigningApiUrl()}/envelope/item/${primaryItem.id}/download?version=signed`,
+    {
+      headers: { Authorization: process.env.SIGNING_API_KEY ?? "" },
+      signal: AbortSignal.timeout(30_000),
+    },
+  );
+  if (!response.ok) {
+    throw new Error(
+      `Failed to fetch signed PDF from Documenso (status ${response.status})`,
+    );
+  }
+  return Buffer.from(await response.arrayBuffer());
 };

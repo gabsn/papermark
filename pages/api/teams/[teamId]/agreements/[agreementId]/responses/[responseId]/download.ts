@@ -118,6 +118,28 @@ export default async function handle(
       throw new TeamError("Signed agreement envelope could not be found.");
     }
 
+    // Self-hosted: Documenso has no pre-signed URLs without S3, so mirror now and serve the copy.
+    if (process.env.PAPERMARK_SELFHOST) {
+      const mirror = await mirrorSignedAgreementToStorage({
+        agreementResponseId: agreementResponse.id,
+      });
+      const { signedFileKey, signedFileName, signedFileStorageType } =
+        mirror.mirrored ? mirror : {};
+      if (!signedFileKey || !signedFileStorageType) {
+        throw new TeamError("Signed agreement could not be retrieved.");
+      }
+      const url = await getFile({
+        type: signedFileStorageType,
+        data: signedFileKey,
+        isDownload: true,
+        responseContentDisposition: buildContentDisposition(
+          signedFileName ?? fallbackName,
+          fallbackName,
+        ),
+      });
+      return res.redirect(302, url);
+    }
+
     // Fallback for responses not yet mirrored: a single keyed Documenso call.
     const { url: downloadUrl } = await getEnvelopeSignedDownloadUrl({
       envelopeId: agreementResponse.signingEnvelopeId,
