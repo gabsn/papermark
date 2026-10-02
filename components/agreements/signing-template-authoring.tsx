@@ -118,6 +118,39 @@ export default function SigningTemplateAuthoring({
     return () => window.clearTimeout(timer);
   }, []);
 
+  // selfhost: Documenso's embedded editor is an Enterprise feature, so the signature fields
+  // are placed in Documenso itself (sign.focustree.app), then confirmed here.
+  const documensoTeamUrl = process.env.NEXT_PUBLIC_SIGNING_TEAM_URL;
+  if (documensoTeamUrl) {
+    const editorUrl = `${host}/t/${documensoTeamUrl}/templates/${envelopeId}/edit`;
+    return (
+      <div className="flex h-full min-h-[300px] w-full flex-col items-start justify-center gap-4 rounded-lg border bg-background p-6 text-sm">
+        <p className="font-medium">Place the signature fields in Documenso</p>
+        <p className="text-muted-foreground">
+          Open the agreement in Documenso, add the signer&apos;s signature, name and date fields
+          where they belong, and save. Then come back and confirm.
+        </p>
+        <div className="flex gap-2">
+          <a
+            href={editorUrl}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="rounded-md bg-primary px-4 py-2 text-primary-foreground"
+          >
+            Open in Documenso
+          </a>
+          <button
+            type="button"
+            className="rounded-md border px-4 py-2"
+            onClick={() => onEnvelopeSaved(envelopeId)}
+          >
+            I&apos;ve placed the fields
+          </button>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className="h-full min-h-[600px] w-full overflow-hidden rounded-lg border bg-background">
       <EmbedUpdateEnvelope
