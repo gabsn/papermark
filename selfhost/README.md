@@ -48,14 +48,32 @@ The AGPL applies to this fork: the source is public at github.com/gabsn/papermar
 
 - Dashboard sign-in is limited to `SELFHOST_ALLOWED_EMAILS` (emails or `@domain`); others get no
   code. People opening a shared link never sign in.
-- NDA: use the "text" agreement (the viewer accepts the text; name, email and time are recorded
-  in `AgreementResponse`). The "embedded signature" flow needs Documenso and is not set up.
+- NDA: two kinds. "Legacy text content": the viewer ticks the text (name, email, time recorded in
+  `AgreementResponse`). "Embedded signature flow": the viewer signs a PDF in Documenso
+  (sign.focustree.app, self-hosted, see below) inside the link, then gets the signed PDF; the
+  webhook marks the response COMPLETED. Signature fields are placed in Documenso itself
+  ("Open in Documenso" at the field step, or text placeholders such as `{{signature}}` in the
+  PDF through its API): Documenso's embedded editor is an Enterprise feature, so we don't use it.
 - Not available: ZIP downloads and data room archives (they used AWS Lambda), office/CAD/video
   conversions (upload PDFs).
 
+## Documenso (e-signature)
+
+Upstream Documenso (no fork, no Docker) runs next to Papermark: clone `~/src/documenso` at a
+release tag, `.env` there (1Password "Documenso self-hosted .env (Mac Mini)"), Node 24 (its Prisma
+generators break on Node 25), database `documenso` in the shared Postgres
+(`node selfhost/create-database.mjs documenso <password>`), storage in the database, SES SMTP from
+sign@focustree.app, a self-signed signing certificate (`~/.local/share/documenso/signing.p12`,
+1Password). Papermark env: `NEXT_PUBLIC_SIGNING_HOST`, `SIGNING_API_URL` (local),
+`SIGNING_API_KEY`, `SIGNING_WEBHOOK_SECRET` (webhook `document.signed` and `document.completed`
+to `/api/webhooks/signing`), `NEXT_PUBLIC_SIGNING_TEAM_URL`. Owner account gabin@focustree.app
+(1Password "Documenso (sign.focustree.app)"); sign-ups are closed.
+
 ## Operations on the Mac Mini
 
-- Service: launchd agent `mini.papermark`, declared in gabsn/mini `jobs.toml` (job `papermark`),
-  log `~/Library/Logs/mini/papermark.log`, data `~/.local/share/papermark`, `.env` in
-  `~/src/papermark/.env`.
-- Public URL: Tailscale Funnel, `https://hermes-mac-mini.tail162ab5.ts.net` → `127.0.0.1:3000`.
+- Services (gabsn/mini `jobs.toml`): `postgres` (`node selfhost/postgres.mjs`, the shared
+  Postgres), `papermark` (`node selfhost/start.mjs --external-postgres`), `documenso`. Logs
+  `~/Library/Logs/mini/<job>.log`, data `~/.local/share/papermark`.
+- Public URLs: https://deck.focustree.app and https://sign.focustree.app (CloudFront, Focus Tree
+  CDK stack `Deck`) → Tailscale Funnel 443 → `127.0.0.1:3000` and 8443 → `127.0.0.1:3100`.
+- Redeploy Papermark: `selfhost/redeploy.sh`.
