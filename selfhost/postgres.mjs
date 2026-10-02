@@ -1,8 +1,13 @@
 // Embedded Postgres for the self-hosted build: real Postgres binaries installed by npm
-// (embedded-postgres), data in $PAPERMARK_DATA/postgres, no service to install.
+// (embedded-postgres), data in $PAPERMARK_DATA/postgres, no service to install. Run alone
+// (`node selfhost/postgres.mjs`) it is the Mini's shared Postgres: Papermark and Documenso
+// each have their own database in it (selfhost/README.md).
 import EmbeddedPostgres from "embedded-postgres";
+import { loadEnv } from "./env.mjs";
 import { existsSync, mkdirSync } from "node:fs";
 import { join, resolve } from "node:path";
+
+loadEnv();
 
 export const DATA_DIR = resolve(process.env.PAPERMARK_DATA ?? join(process.cwd(), ".data"));
 export const PG_PORT = Number(process.env.PAPERMARK_PG_PORT ?? 54329);

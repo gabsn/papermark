@@ -1,24 +1,21 @@
 // One command to run the self-hosted Papermark: starts the embedded Postgres, applies the
 // Prisma migrations, then runs Next.js (`next start` after `npm run selfhost:build`, or
-// `next dev` with --dev; --build-only prepares a deploy and exits). Stops Postgres when Next exits. See selfhost/README.md.
+// `next dev` with --dev; --build-only prepares a deploy and exits). Stops Postgres when Next exits;
+// --external-postgres uses the shared Postgres service instead. See selfhost/README.md.
 import { spawn } from "node:child_process";
-import { existsSync, readFileSync } from "node:fs";
-import { join } from "node:path";
+import { createConnection } from "node:net";
 
+import { loadEnv } from "./env.mjs";
 
 const root = new URL("..", import.meta.url).pathname;
 const dev = process.argv.includes("--dev");
+// The shared Postgres runs as its own service (selfhost/postgres.mjs, job `postgres` on the Mini):
+// wait for it instead of starting one.
+const externalPostgres = process.argv.includes("--external-postgres");
 const buildOnly = process.argv.includes("--build-only");
 const build = buildOnly || process.argv.includes("--build");
 
-// .env at the repo root, without overriding variables already set by the caller.
-const envFile = join(root, ".env");
-if (existsSync(envFile)) {
-  for (const line of readFileSync(envFile, "utf8").split("\n")) {
-    const m = line.match(/^\s*([A-Z0-9_]+)\s*=\s*(.*)\s*$/);
-    if (m && process.env[m[1]] === undefined) process.env[m[1]] = m[2].replace(/^"(.*)"$/, "$1");
-  }
-}
+loadEnv(root);
 process.env.PAPERMARK_SELFHOST = "1";
 // Imported after .env is read: postgres.mjs takes PAPERMARK_DATA and the port from the environment.
 const { DATABASE_URL, DATA_DIR, startPostgres } = await import("./postgres.mjs");
@@ -32,7 +29,19 @@ const run = (cmd, args) =>
     p.on("exit", (code) => (code === 0 ? resolve() : reject(new Error(`${cmd} ${args.join(" ")} exited ${code}`))));
   });
 
-const pg = await startPostgres();
+const waitForPort = async (port) => {
+  for (let i = 0; i < 120; i++) {
+    const ok = await new Promise((resolve) => {
+      const c = createConnection({ host: "127.0.0.1", port }, () => (c.end(), resolve(true)));
+      c.on("error", () => resolve(false));
+    });
+    if (ok) return;
+    await new Promise((r) => setTimeout(r, 1000));
+  }
+  throw new Error(`postgres did not answer on ${port}`);
+};
+const pg = externalPostgres ? { stop: async () => {} } : await startPostgres();
+if (externalPostgres) await waitForPort(Number(process.env.PAPERMARK_PG_PORT ?? 54329));
 console.log(`postgres: ${DATABASE_URL} (data in ${DATA_DIR})`);
 let next;
 const stop = async (code = 0) => {
