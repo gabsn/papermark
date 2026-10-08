@@ -77,7 +77,9 @@ to `/api/webhooks/signing`), `NEXT_PUBLIC_SIGNING_TEAM_URL`. Owner account gabin
   Postgres), `papermark` (`node selfhost/start.mjs --external-postgres`), `documenso`. Logs
   `~/Library/Logs/mini/<job>.log`, data `~/.local/share/papermark`.
 - Public URLs: https://deck.focustree.app and https://sign.focustree.app (CloudFront, Focus Tree
-  CDK stack `Deck`) → Tailscale Funnel 443 → `127.0.0.1:3000` and 8443 → `127.0.0.1:3100`.
+  CDK stack `Deck`) → Cloudflare Tunnel (gabsn/mini job `origin-tunnel`: deck-origin.arkadia.so and
+  sign-origin.arkadia.so, CloudFront only) → `127.0.0.1:3000` and `127.0.0.1:3100`. No Tailscale Funnel
+  since 2026-10-08.
 - Deploy: `selfhost/deploy.sh` is the `papermark` job's setup, so every `bin/mini install` runs it;
   it rebuilds only when origin/main differs from `.deployed-commit`. Force with `selfhost/redeploy.sh`.
 - QA: `node selfhost/qa/deck-e2e.mjs` (daily job `deck-qa`) opens the internal link `QA_LINK_ID` (a

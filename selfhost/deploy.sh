@@ -1,7 +1,9 @@
 #!/bin/zsh -l
 # Deploy on the Mac Mini, idempotent: the `papermark` job's setup in gabsn/mini runs it on every
-# `bin/mini install`. When origin/main is already deployed it only checks the Funnel; otherwise it
+# `bin/mini install`. When origin/main is already deployed it does nothing; otherwise it
 # stops the service, installs, migrates and builds, then starts the service again.
+# Public access: deck.focustree.app (CloudFront) -> Cloudflare Tunnel of gabsn/mini job origin-tunnel
+# (deck-origin.arkadia.so) -> 127.0.0.1:3000. Tailscale Funnel is no longer used (2026-10-08).
 set -e
 cd "$(dirname "$0")/.."
 LABEL="gui/$(id -u)/mini.papermark"
@@ -20,4 +22,3 @@ else
   [[ -f "$PLIST" ]] && launchctl bootstrap "gui/$(id -u)" "$PLIST" || true
   echo "papermark: deployed $(git log --oneline -1)"
 fi
-tailscale funnel status 2>/dev/null | grep -q "127.0.0.1:3000" || tailscale funnel --bg --https=443 http://127.0.0.1:3000 > /dev/null
