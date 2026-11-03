@@ -15,6 +15,24 @@ node selfhost/qa/deck-e2e.mjs      # end-to-end buyer flow check on the public U
 
 `NEXT_PUBLIC_*` values are baked into the build: set the public URL in `.env` before building.
 
+## Container
+
+`selfhost/Dockerfile` builds the same app as one linux/arm64 image; the workflow
+`deck-vm-image.yml` pushes it to `ghcr.io/gabsn/papermark` (`:main` and `:<commit>`, public) on
+every push to main touching `selfhost/`, `prisma/` or the lockfile. The `NEXT_PUBLIC_*` values are
+build args (deck.focustree.app by default). No secret and no runtime setting is in the image: pass
+the whole `.env` base64-encoded in `PAPERMARK_ENV_B64`, which `selfhost/docker-entrypoint.sh`
+writes to `/app/.env` before running the command. That `.env` sets `HOST=0.0.0.0`, `PORT`,
+`PAPERMARK_DATA` (a mounted volume) and `POSTGRES_PRISMA_URL` / `POSTGRES_PRISMA_URL_NON_POOLING`
+for the database server; the default command is `node selfhost/start.mjs --external-postgres`, which
+migrates then starts. The image has Chromium (`CHROME_PATH`, `--no-sandbox` set in
+`/etc/chromium.d/container`), so the same image runs the QA:
+
+```bash
+docker run --rm -e PAPERMARK_ENV_B64="$(base64 < .env)" -v <data>:<PAPERMARK_DATA> \
+  ghcr.io/gabsn/papermark:main node selfhost/qa/deck-e2e.mjs
+```
+
 ## How it works
 
 `PAPERMARK_SELFHOST=1` (set by `start.mjs`) makes `next.config.mjs` alias each hosted service to

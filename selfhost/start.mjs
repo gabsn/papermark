@@ -29,19 +29,24 @@ const run = (cmd, args) =>
     p.on("exit", (code) => (code === 0 ? resolve() : reject(new Error(`${cmd} ${args.join(" ")} exited ${code}`))));
   });
 
-const waitForPort = async (port) => {
+const waitForPort = async (host, port) => {
   for (let i = 0; i < 120; i++) {
     const ok = await new Promise((resolve) => {
-      const c = createConnection({ host: "127.0.0.1", port }, () => (c.end(), resolve(true)));
+      const c = createConnection({ host, port }, () => (c.end(), resolve(true)));
       c.on("error", () => resolve(false));
     });
     if (ok) return;
     await new Promise((r) => setTimeout(r, 1000));
   }
-  throw new Error(`postgres did not answer on ${port}`);
+  throw new Error(`postgres did not answer on ${host}:${port}`);
 };
 const pg = externalPostgres ? { stop: async () => {} } : await startPostgres();
-if (externalPostgres) await waitForPort(Number(process.env.PAPERMARK_PG_PORT ?? 54329));
+// Wait for the server the migrations use: 127.0.0.1:54329 on the Mini, the database service in a
+// container (selfhost/Dockerfile).
+if (externalPostgres) {
+  const { hostname, port } = new URL(process.env.POSTGRES_PRISMA_URL_NON_POOLING);
+  await waitForPort(hostname, Number(port || 5432));
+}
 console.log(`postgres: ${DATABASE_URL} (data in ${DATA_DIR})`);
 let next;
 const stop = async (code = 0) => {

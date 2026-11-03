@@ -1,0 +1,10 @@
+# Build context of selfhost/Dockerfile (BuildKit reads <Dockerfile>.dockerignore). No .env: secrets
+# are passed at run time.
+.git
+.env
+.env.*
+!.env.example
+node_modules
+.next
+.data
+.deployed-commit
