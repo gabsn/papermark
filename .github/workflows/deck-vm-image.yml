@@ -55,7 +55,7 @@ jobs:
             NEXT_PUBLIC_UPLOAD_TRANSPORT=s3
             NEXT_PUBLIC_WEBHOOK_BASE_HOST=webhooks.invalid
             NEXT_PUBLIC_WEBHOOK_BASE_URL=https://webhooks.invalid
-            NEXT_PUBLIC_SIGNING_HOST=https://sign.focustree.app
+            NEXT_PUBLIC_SIGNING_HOST=https://sign.trait.so
             NEXT_PUBLIC_SIGNING_TEAM_URL=personal_koyhffdfsztdzorx
           cache-from: type=gha
           cache-to: type=gha,mode=max
